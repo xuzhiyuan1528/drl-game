@@ -12,5 +12,5 @@
 
 ```{bash}
     cd pong
-    python3 deep_q_pong_player.py
+    python3 deep_q_half_pong_player.py
 ```
