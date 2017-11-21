@@ -30,6 +30,11 @@ class DeepQHalfPongPlayer(PyGamePlayer):
     SAVE_EVERY_X_STEPS = 10000
     LEARN_RATE = 1e-6
     STORE_SCORES_LEN = 200.
+
+    # !!
+    # For the trained model, the screen width and height are very small.
+    # To see the game clearer, set the width and height to be larger numbers,
+    # such as 640 and 480 respectively.
     SCREEN_WIDTH = 40
     SCREEN_HEIGHT = 40
 
