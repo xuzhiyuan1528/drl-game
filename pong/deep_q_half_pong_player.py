@@ -30,8 +30,8 @@ class DeepQHalfPongPlayer(PyGamePlayer):
     SAVE_EVERY_X_STEPS = 10000
     LEARN_RATE = 1e-6
     STORE_SCORES_LEN = 200.
-    SCREEN_WIDTH = 640
-    SCREEN_HEIGHT = 480
+    SCREEN_WIDTH = 40
+    SCREEN_HEIGHT = 40
 
     def __init__(self,
                  # to see a trained network change checkpoint_path="deep_q_half_pong_networks_40x40_8" and
@@ -250,7 +250,15 @@ class DeepQHalfPongPlayer(PyGamePlayer):
 
 
 if __name__ == '__main__':
-    # to see a trained network add the args checkpoint_path="deep_q_half_pong_networks_40x40_8" and
-    # playback_mode="True"
-    player = DeepQHalfPongPlayer()
+    # Here, it loads the trained model and plays the game.
+    # Please note that the model was trained with 40*40 grid at 8 frames per
+    # second, so the game window is very small.
+    player = DeepQHalfPongPlayer(
+        checkpoint_path='deep_q_half_pong_networks_40x40_8',
+        playback_mode=True
+    )
+
+    # To train the model, uncomment the following code.
+    # player = DeepQHalfPongPlayer()
+
     player.start()
