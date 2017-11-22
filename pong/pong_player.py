@@ -7,7 +7,8 @@ class PongPlayer(PyGamePlayer):
         """
         Example class for playing Pong
         """
-        super(PongPlayer, self).__init__(force_game_fps=force_game_fps, run_real_time=run_real_time)
+        super(PongPlayer, self).__init__(force_game_fps=force_game_fps,
+                                         run_real_time=run_real_time)
         self.last_bar1_score = 0.0
         self.last_bar2_score = 0.0
 
@@ -20,7 +21,8 @@ class PongPlayer(PyGamePlayer):
         from games.pong import bar1_score, bar2_score
 
         # get the difference in score between this and the last run
-        score_change = (bar1_score - self.last_bar1_score) - (bar2_score - self.last_bar2_score)
+        score_change = (bar1_score - self.last_bar1_score) - (
+        bar2_score - self.last_bar2_score)
         self.last_bar1_score = bar1_score
         self.last_bar2_score = bar2_score
 
