@@ -38,11 +38,13 @@ EPS_BEGIN = getattr(FLAGS, 'epsilon_begin')
 EPS_END = getattr(FLAGS, 'epsilon_end')
 EPS_STEPS = getattr(FLAGS, 'epsilon_steps')
 
-playback_mode = False
-
+# import os
+# os.environ["SDL_VIDEODRIVER"] = "dummy"
 class DqnBirdSyr():
 
-    def __init__(self):
+    def __init__(self, playback_mode):
+        self._playback_mode = playback_mode
+
         env = FlappyBird()
         self._ple = PLE(env, fps=30, display_screen=False)
         self._ple.init()
@@ -62,7 +64,6 @@ class DqnBirdSyr():
         for ep in range(MAX_EP):
             sum_reward = 0
             last_state = []
-
             for _ in range(STATE_FRAMES):
                 last_state.append(self._ple.getScreenGrayscale())
             last_state = np.dstack(last_state)
@@ -87,7 +88,7 @@ class DqnBirdSyr():
 
                 self._replay_buffer.add(last_state, act_1_hot, reward, state, done)
 
-                if len(self._replay_buffer) > OBV_STEPS:
+                if not self._playback_mode and len(self._replay_buffer) > OBV_STEPS:
                     self._train()
 
                 last_state = state
@@ -127,5 +128,5 @@ class DqnBirdSyr():
 
 
 if __name__ == '__main__':
-    dqn_bird = DqnBirdSyr()
+    dqn_bird = DqnBirdSyr(playback_mode = False)
     dqn_bird.start()

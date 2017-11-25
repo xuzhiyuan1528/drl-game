@@ -26,10 +26,10 @@ def build_cnn(dim_s, dim_a):
     net = tflearn.max_pool_2d(net, 2)
     net = tflearn.local_response_normalization(net)
 
-    net = tflearn.fully_connected(net, 128, activation='tanh')
+    net = tflearn.fully_connected(net, 80, activation='tanh')
     net = tflearn.dropout(net, 0.8)
 
-    net = tflearn.fully_connected(net, 256, activation='tanh')
+    net = tflearn.fully_connected(net, 100, activation='tanh')
     net = tflearn.dropout(net, 0.8)
 
     q_values = tflearn.fully_connected(net, dim_a)
