@@ -79,6 +79,7 @@ class DqnHalfPongSyr(PyGamePlayer):
                     print('| Step: %i' % self._steps,
                           '| Epoch: %i' % (self._steps / EP_STEPS),
                           '| Sum_Reward: %i' % self._sum_reward)
+                    self._sum_reward = 0
 
         self._last_state = current_state
         self._last_action = self._get_action()

@@ -6,7 +6,7 @@ if __name__ == '__main__':
     # second, so the game window is very small.
     player = DeepQHalfPongPlayer(
         checkpoint_path='./Res/deep_q_half_pong_networks_40x40_8',
-        playback_mode=True
+        playback_mode=False
     )
 
     # To train the model, uncomment the following code.
