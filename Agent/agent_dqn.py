@@ -1,7 +1,7 @@
 import tensorflow as tf
 import tflearn
 
-from Net.network import build_flat_net, build_simple_cnn
+from Net.network import build_flat_net, build_simple_cnn, build_cnn
 
 
 class DQNAgent():
@@ -12,10 +12,10 @@ class DQNAgent():
         self.__lr = learning_rate
         self.__tau = tau
 
-        self.__inputs, self.__out = build_simple_cnn(dim_state, dim_action)
+        self.__inputs, self.__out = build_cnn(dim_state, dim_action)
         self.__paras = tf.trainable_variables()
 
-        self.__target_inputs, self.__target_out = build_simple_cnn(dim_state, dim_action)
+        self.__target_inputs, self.__target_out = build_cnn(dim_state, dim_action)
 
         self.__target_paras = tf.trainable_variables()[(len(self.__paras)):]
 
@@ -31,9 +31,7 @@ class DQNAgent():
         action_q_values = tf.reduce_sum(tf.multiply(self.__out, self.__actions))
 
         self.loss = tflearn.mean_square(self.__y_values, action_q_values)
-        self.optimize = tf.train.AdagradOptimizer(self.__lr).minimize(self.loss)
-
-
+        self.optimize = tf.train.AdamOptimizer(self.__lr).minimize(self.loss)
 
     def train(self, inputs, action, y_values):
         return self.__sess.run([self.optimize, self.loss], feed_dict={

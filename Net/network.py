@@ -1,6 +1,7 @@
 import tensorflow as tf
 import tflearn
 
+
 def build_flat_net(dim_s, dim_a):
     inputs = tf.placeholder(tf.float32, shape=[None] + dim_s)
     net = tf.contrib.layers.flatten(inputs)
@@ -12,6 +13,29 @@ def build_flat_net(dim_s, dim_a):
     q_values = tflearn.fully_connected(net, dim_a)
 
     return inputs, q_values
+
+
+def build_cnn(dim_s, dim_a):
+    inputs = tf.placeholder(tf.float32, shape=[None] + dim_s)
+
+    net = tflearn.conv_2d(inputs, 30, 3, activation='relu', regularizer='L2')
+    net = tflearn.max_pool_2d(net, 2)
+    net = tflearn.local_response_normalization(net)
+
+    net = tflearn.conv_2d(net, 64, 3, activation='relu', regularizer='L2')
+    net = tflearn.max_pool_2d(net, 2)
+    net = tflearn.local_response_normalization(net)
+
+    net = tflearn.fully_connected(net, 128, activation='tanh')
+    net = tflearn.dropout(net, 0.8)
+
+    net = tflearn.fully_connected(net, 256, activation='tanh')
+    net = tflearn.dropout(net, 0.8)
+
+    q_values = tflearn.fully_connected(net, dim_a)
+
+    return inputs, q_values
+
 
 def build_simple_cnn(dim_s, dim_a):
     SCREEN_WIDTH = dim_s[0]

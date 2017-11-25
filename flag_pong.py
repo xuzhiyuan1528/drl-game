@@ -3,7 +3,7 @@ import os
 from os.path import join as pjoin
 
 def home_out(path):
-    full_path = pjoin('Res', path)
+    full_path = pjoin('Res', 'Half-Pong', path)
     if not os.path.exists(full_path):
         os.mkdir(full_path)
     return full_path
@@ -23,7 +23,7 @@ flags.DEFINE_integer('mini_batch', 200, "size of mini batch")
 
 flags.DEFINE_float('epsilon_begin', 1.0, 'epsilon greedy in the beginning')
 flags.DEFINE_float('epsilon_end', 0.01, 'epsilon greedy in the end')
-flags.DEFINE_integer('observe_steps', 50000, 'steps for observation')
+flags.DEFINE_integer('observe_steps', 200, 'steps for observation')
 flags.DEFINE_integer('epsilon_steps', 500000, 'steps for epsilon greedy explore')
 
 flags.DEFINE_integer('check_point_steps', 10000, 'steps for save model')

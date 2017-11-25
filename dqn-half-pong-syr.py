@@ -7,7 +7,7 @@ from Agent.agent_dqn import DQNAgent
 from Env.pygame_player import PyGamePlayer
 from Tools.explorer import Explorer
 from Tools.replaybuffer import ReplayBuffer
-from flag import FLAGS
+from flag_pong import FLAGS
 from pygame.constants import K_DOWN, K_UP
 
 time_stamp = str(datetime.datetime.now().strftime('%y-%m-%d-%H-%M-%S'))
