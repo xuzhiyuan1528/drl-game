@@ -38,15 +38,19 @@ EPS_BEGIN = getattr(FLAGS, 'epsilon_begin')
 EPS_END = getattr(FLAGS, 'epsilon_end')
 EPS_STEPS = getattr(FLAGS, 'epsilon_steps')
 
-# import os
-# os.environ["SDL_VIDEODRIVER"] = "dummy"
+
+DISPLAY = getattr(FLAGS, 'display')
+
+if not DISPLAY:
+    import os
+    os.environ["SDL_VIDEODRIVER"] = "dummy"
 class DqnBirdSyr():
 
     def __init__(self, playback_mode):
         self._playback_mode = playback_mode
 
-        env = FlappyBird()
-        self._ple = PLE(env, fps=30, display_screen=False)
+        env = FlappyBird(pipe_gap=200)
+        self._ple = PLE(env, fps=30, display_screen=DISPLAY)
         self._ple.init()
 
         self._sess = tf.Session()
@@ -76,6 +80,10 @@ class DqnBirdSyr():
                 act_index = np.argmax(act_1_hot)
 
                 reward = self._ple.act(self._ple.getActionSet()[act_index])
+                if reward == 0:
+                    reward = 0.1
+                elif reward == -5:
+                    reward = -1
 
                 state = []
                 for _ in range(STATE_FRAMES):
