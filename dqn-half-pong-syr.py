@@ -39,11 +39,10 @@ EPS_BEGIN = getattr(FLAGS, 'epsilon_begin')
 EPS_END = getattr(FLAGS, 'epsilon_end')
 EPS_STEPS = getattr(FLAGS, 'epsilon_steps')
 
-
 DISPLAY = getattr(FLAGS, 'display')
 
 class DqnHalfPongSyr(PyGamePlayer):
-    def __init__(self, playback_mode):
+    def __init__(self, playback_mode, mod=None):
         self._playback_mode = playback_mode
         self._last_reward = 0
         super(DqnHalfPongSyr, self).__init__(force_game_fps=8, run_real_time=playback_mode)
@@ -70,6 +69,11 @@ class DqnHalfPongSyr(PyGamePlayer):
         self._steps = 0
         self._sum_reward = 0
         self._dif_reward = deque(maxlen=EP_STEPS)
+
+        if mod:
+            checkpoint = tf.train.get_checkpoint_state(FLAGS.dir_mod.format(mod))
+            self.saver.restore(self.sess, save_path=checkpoint.model_checkpoint_path)
+            print("Loaded checkpoints {0}".format(checkpoint.model_checkpoint_path))
 
     def get_keys_pressed(self, screen_array, feedback, terminal):
         _, screen_binary = cv2.threshold(cv2.cvtColor(screen_array, cv2.COLOR_BGR2GRAY), 1, 255,
@@ -162,5 +166,5 @@ class DqnHalfPongSyr(PyGamePlayer):
 
 
 if __name__ == '__main__':
-    dqn = DqnHalfPongSyr(playback_mode=False)
+    dqn = DqnHalfPongSyr(playback_mode=False, mod='17-11-26-16-37-22')
     dqn.start()

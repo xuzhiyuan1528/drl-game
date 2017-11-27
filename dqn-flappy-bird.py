@@ -9,6 +9,8 @@ from Agent.agent_dqn import DQNAgent
 from Tools.explorer import Explorer
 from Tools.replaybuffer import ReplayBuffer
 from flag_bird import FLAGS
+from Tools.summary import Summary
+
 
 time_stamp = str(datetime.datetime.now().strftime('%y-%m-%d-%H-%M-%S'))
 
@@ -28,7 +30,7 @@ LR = getattr(FLAGS, 'learning_rate')
 TAU = getattr(FLAGS, 'tau')
 GAMMA = getattr(FLAGS, 'gamma')
 
-dir_sum = getattr(FLAGS, 'dir_sum').format(time_stamp)
+DIR_SUM = getattr(FLAGS, 'dir_sum').format(time_stamp)
 DIR_MOD = getattr(FLAGS, 'dir_mod').format(time_stamp)
 
 BUFFER_SIZE = getattr(FLAGS, 'size_buffer')
@@ -46,7 +48,7 @@ if not DISPLAY:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
 class DqnBirdSyr():
 
-    def __init__(self, playback_mode):
+    def __init__(self, playback_mode, mod=None):
         self._playback_mode = playback_mode
 
         env = FlappyBird(pipe_gap=200)
@@ -61,8 +63,19 @@ class DqnBirdSyr():
         self._saver = tf.train.Saver()
         self._replay_buffer = ReplayBuffer(BUFFER_SIZE)
         self._explorer = Explorer(EPS_BEGIN, EPS_END, EPS_STEPS, playback_mode)
+        self.summary = Summary(self._sess, DIR_SUM)
+
+        self.summary.add_variable(tf.Variable(0.), 'reward')
+        self.summary.add_variable(tf.Variable(0.), 'loss')
+        self.summary.build()
+        self.summary.write_variables(FLAGS)
 
         self._steps = 0
+
+        if mod:
+            checkpoint = tf.train.get_checkpoint_state(FLAGS.dir_mod.format(mod))
+            self._saver.restore(self._sess, save_path=checkpoint.model_checkpoint_path)
+            print("Loaded checkpoints {0}".format(checkpoint.model_checkpoint_path))
 
     def start(self):
         for ep in range(MAX_EP):
@@ -96,8 +109,9 @@ class DqnBirdSyr():
 
                 self._replay_buffer.add(last_state, act_1_hot, reward, state, done)
 
+                loss = None
                 if not self._playback_mode and len(self._replay_buffer) > OBV_STEPS:
-                    self._train()
+                    loss = self._train()
 
                 last_state = state
                 sum_reward += reward
@@ -106,6 +120,10 @@ class DqnBirdSyr():
                           '| Episode: %i' % ep,
                           '| Epoch: %i' % step,
                           '| Sum_Reward: %i' % sum_reward)
+                    if loss != None:
+                        self.summary.run(feed_dict={
+                            'loss': loss,
+                            'reward': sum_reward})
                     self._ple.reset_game()
                     break
 
@@ -134,7 +152,9 @@ class DqnBirdSyr():
             self._saver.save(self._sess, DIR_MOD + '/net', global_step=self._steps)
             print('Mod saved!')
 
+        return loss
+
 
 if __name__ == '__main__':
-    dqn_bird = DqnBirdSyr(playback_mode = False)
+    dqn_bird = DqnBirdSyr(playback_mode = False, mod='17-11-26-16-04-59')
     dqn_bird.start()
