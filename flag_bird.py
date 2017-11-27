@@ -3,7 +3,7 @@ import os
 from os.path import join as pjoin
 
 def home_out(path):
-    full_path = pjoin('Res', path)
+    full_path = pjoin('Res', 'Flappy-Bird',path)
     if not os.path.exists(full_path):
         os.mkdir(full_path)
     return full_path

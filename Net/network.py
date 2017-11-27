@@ -14,8 +14,29 @@ def build_flat_net(dim_s, dim_a):
 
     return inputs, q_values
 
+def build_cnn_pong(dim_s, dim_a):
+    inputs = tf.placeholder(tf.float32, shape=[None] + dim_s)
 
-def build_cnn(dim_s, dim_a):
+    net = tflearn.conv_2d(inputs, 30, 3, strides=2, activation='relu')
+    net = tflearn.max_pool_2d(net, 2)
+    net = tflearn.local_response_normalization(net)
+
+    net = tflearn.conv_2d(net, 64, 3, strides=2, activation='relu')
+    net = tflearn.max_pool_2d(net, 2)
+    net = tflearn.local_response_normalization(net)
+
+    net = tflearn.fully_connected(net, 80, activation='tanh', regularizer='L2')
+    net = tflearn.dropout(net, 0.8)
+
+    net = tflearn.fully_connected(net, 100, activation='tanh')
+    net = tflearn.dropout(net, 0.8)
+
+    q_values = tflearn.fully_connected(net, dim_a)
+
+    return inputs, q_values
+
+
+def build_cnn_bird(dim_s, dim_a):
     inputs = tf.placeholder(tf.float32, shape=[None] + dim_s)
 
     net = tf.image.resize_images(inputs, size=(80, 80))

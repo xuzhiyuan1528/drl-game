@@ -54,7 +54,7 @@ class DqnBirdSyr():
         self._ple.init()
 
         self._sess = tf.Session()
-        self._agent = DQNAgent(self._sess, DIM_STATE, DIM_ACTION, LR, TAU)
+        self._agent = DQNAgent(self._sess, DIM_STATE, DIM_ACTION, LR, TAU, net_name='cnn_bird')
         self._sess.run(tf.global_variables_initializer())
         self._agent.update_target_paras()
 

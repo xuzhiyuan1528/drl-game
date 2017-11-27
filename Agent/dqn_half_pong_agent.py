@@ -72,6 +72,7 @@ class DeepQHalfPongPlayer(PyGamePlayer):
 
         self._observations = deque()
         self._last_scores = deque()
+        self._sum_reward = [0]
 
         # set the first action to do nothing
         self._last_action = np.zeros(self.ACTIONS_COUNT)
@@ -100,6 +101,7 @@ class DeepQHalfPongPlayer(PyGamePlayer):
                                          cv2.THRESH_BINARY)
 
         if reward != 0.0:
+            self._sum_reward.append(reward)
             self._last_scores.append(reward)
             if len(self._last_scores) > self.STORE_SCORES_LEN:
                 self._last_scores.popleft()
@@ -125,6 +127,9 @@ class DeepQHalfPongPlayer(PyGamePlayer):
             if len(self._observations) > self.OBSERVATION_STEPS:
                 self._train()
                 self._time += 1
+                if not self._time % self.STORE_SCORES_LEN:
+                    print("Sum_Reward:", sum(self._sum_reward) / len(self._sum_reward))
+                    self._sum_reward = [0]
 
         # update the old values
         self._last_state = current_state
@@ -137,6 +142,7 @@ class DeepQHalfPongPlayer(PyGamePlayer):
                     and len(self._observations) > self.OBSERVATION_STEPS:
                 self._probability_of_random_action -= \
                     (self.INITIAL_RANDOM_ACTION_PROB - self.FINAL_RANDOM_ACTION_PROB) / self.EXPLORE_STEPS
+
 
             print("Time: %s random_action_prob: %s reward %s scores differential %s" %
                   (self._time, self._probability_of_random_action, reward,

@@ -11,6 +11,7 @@ def home_out(path):
 flags = tf.app.flags
 FLAGS = flags.FLAGS
 
+flags.DEFINE_boolean('display', True, 'display screen')
 flags.DEFINE_integer('random_seed', 8, "seed for random generation")
 
 flags.DEFINE_integer('frames', 4, 'the frames for each state')
@@ -33,8 +34,8 @@ flags.DEFINE_integer('epochs', 200, 'training epochs for each episode')
 
 flags.DEFINE_float('gamma', 0.99, "discount value for reward")
 
-flags.DEFINE_float('learning_rate', 0.001, "learning rate for DQN")
-flags.DEFINE_float('tau', 1., "tau for target network update")
+flags.DEFINE_float('learning_rate', 0.00001, "learning rate for DQN")
+flags.DEFINE_float('tau', 0.001, "tau for target network update")
 
 flags.DEFINE_string('dir_sum', home_out('sum') + '/{0}', "directory to store the tf summary")
 flags.DEFINE_string('dir_mod', home_out('mod') + '/{0}', 'the path of saved models')

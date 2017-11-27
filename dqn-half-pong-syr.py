@@ -1,4 +1,6 @@
 import datetime
+from collections import deque
+
 import cv2
 import tensorflow as tf
 import numpy as np
@@ -7,6 +9,7 @@ from Agent.agent_dqn import DQNAgent
 from Env.pygame_player import PyGamePlayer
 from Tools.explorer import Explorer
 from Tools.replaybuffer import ReplayBuffer
+from Tools.summary import Summary
 from flag_pong import FLAGS
 from pygame.constants import K_DOWN, K_UP
 
@@ -26,7 +29,7 @@ LR = getattr(FLAGS, 'learning_rate')
 TAU = getattr(FLAGS, 'tau')
 GAMMA = getattr(FLAGS, 'gamma')
 
-dir_sum = getattr(FLAGS, 'dir_sum').format(time_stamp)
+DIR_SUM = getattr(FLAGS, 'dir_sum').format(time_stamp)
 DIR_MOD = getattr(FLAGS, 'dir_mod').format(time_stamp)
 
 BUFFER_SIZE = getattr(FLAGS, 'size_buffer')
@@ -36,6 +39,8 @@ EPS_BEGIN = getattr(FLAGS, 'epsilon_begin')
 EPS_END = getattr(FLAGS, 'epsilon_end')
 EPS_STEPS = getattr(FLAGS, 'epsilon_steps')
 
+
+DISPLAY = getattr(FLAGS, 'display')
 
 class DqnHalfPongSyr(PyGamePlayer):
     def __init__(self, playback_mode):
@@ -48,16 +53,23 @@ class DqnHalfPongSyr(PyGamePlayer):
         self._last_action[1] = 1
 
         self.sess = tf.Session()
-        self.agent = DQNAgent(self.sess, DIM_STATE, DIM_ACTION, LR, TAU)
+        self.agent = DQNAgent(self.sess, DIM_STATE, DIM_ACTION, LR, TAU, net_name='cnn_pong')
         self.sess.run(tf.global_variables_initializer())
         self.agent.update_target_paras()
         self.saver = tf.train.Saver()
 
         self.replay_buffer = ReplayBuffer(BUFFER_SIZE)
         self.explorer = Explorer(EPS_BEGIN, EPS_END, EPS_STEPS, playback_mode)
+        self.summary = Summary(self.sess, DIR_SUM)
+
+        self.summary.add_variable(tf.Variable(0.), 'reward')
+        self.summary.add_variable(tf.Variable(0.), 'loss')
+        self.summary.build()
+        self.summary.write_variables(FLAGS)
 
         self._steps = 0
         self._sum_reward = 0
+        self._dif_reward = deque(maxlen=EP_STEPS)
 
     def get_keys_pressed(self, screen_array, feedback, terminal):
         _, screen_binary = cv2.threshold(cv2.cvtColor(screen_array, cv2.COLOR_BGR2GRAY), 1, 255,
@@ -73,12 +85,18 @@ class DqnHalfPongSyr(PyGamePlayer):
         if not self._playback_mode:
             self.replay_buffer.add(self._last_state, self._last_action, feedback, current_state, terminal)
             if len(self.replay_buffer) > OBV_STEPS:
-                self._train()
+                loss = self._train()
                 self._sum_reward += feedback
+                if feedback != 0.0:
+                    self._dif_reward.append(feedback)
                 if not self._steps % EP_STEPS:
                     print('| Step: %i' % self._steps,
                           '| Epoch: %i' % (self._steps / EP_STEPS),
-                          '| Sum_Reward: %i' % self._sum_reward)
+                          '| Sum_Reward: %i' % self._sum_reward,
+                          '| Dif_Reward: %.4f' % (sum(self._dif_reward) / len(self._dif_reward)))
+                    self.summary.run(feed_dict={
+                        'loss': loss,
+                        'reward': self._sum_reward})
                     self._sum_reward = 0
 
         self._last_state = current_state
@@ -113,6 +131,8 @@ class DqnHalfPongSyr(PyGamePlayer):
         if not self._steps % CKP_STEP:
             self.saver.save(self.sess, DIR_MOD + '/net', global_step=self._steps)
             print('Mod saved!')
+
+        return loss
 
 
     def get_feedback(self):
