@@ -101,7 +101,6 @@ class DeepQHalfPongPlayer(PyGamePlayer):
                                          cv2.THRESH_BINARY)
 
         if reward != 0.0:
-            self._sum_reward.append(reward)
             self._last_scores.append(reward)
             if len(self._last_scores) > self.STORE_SCORES_LEN:
                 self._last_scores.popleft()
@@ -127,8 +126,9 @@ class DeepQHalfPongPlayer(PyGamePlayer):
             if len(self._observations) > self.OBSERVATION_STEPS:
                 self._train()
                 self._time += 1
+                self._sum_reward.append(reward)
                 if not self._time % self.STORE_SCORES_LEN:
-                    print("Sum_Reward:", sum(self._sum_reward) / len(self._sum_reward))
+                    print("Sum_Reward:", sum(self._sum_reward))
                     self._sum_reward = [0]
 
         # update the old values
