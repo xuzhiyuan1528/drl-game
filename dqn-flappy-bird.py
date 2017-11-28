@@ -3,6 +3,7 @@ from ple import PLE
 from ple.games.flappybird import FlappyBird
 import tensorflow as tf
 import numpy as np
+import os
 # The doc of Flappy Bird is at
 # http://pygame-learning-environment.readthedocs.io/en/latest/user/games/flappybird.html.
 from Agent.agent_dqn import DQNAgent
@@ -44,7 +45,6 @@ EPS_STEPS = getattr(FLAGS, 'epsilon_steps')
 DISPLAY = getattr(FLAGS, 'display')
 
 if not DISPLAY:
-    import os
     os.environ["SDL_VIDEODRIVER"] = "dummy"
 class DqnBirdSyr():
 
@@ -85,10 +85,10 @@ class DqnBirdSyr():
                 last_state.append(self._ple.getScreenGrayscale())
             last_state = np.dstack(last_state)
 
-            # Avoid cold start
-            for i in range(10):
-                self._ple.act(self._ple.getActionSet()[0])
-                self._ple.act(self._ple.getActionSet()[1])
+            # # Avoid cold start
+            # for i in range(0):
+            #     self._ple.act(self._ple.getActionSet()[0])
+            #     self._ple.act(self._ple.getActionSet()[1])
 
             for step in range(EP_STEPS):
 
@@ -120,6 +120,8 @@ class DqnBirdSyr():
 
                 last_state = state
                 sum_reward += reward
+                self._steps += 1
+
                 if done:
                     print('| Step: %i' % self._steps,
                           '| Episode: %i' % ep,
@@ -134,7 +136,6 @@ class DqnBirdSyr():
 
 
     def _train(self):
-        self._steps += 1
         batch_state, batch_action, batch_reward, batch_state_next, batch_done = \
             self._replay_buffer.sample_batch(MINI_BATCH)
 
