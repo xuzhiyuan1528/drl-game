@@ -11,7 +11,7 @@ def home_out(path):
 flags = tf.app.flags
 FLAGS = flags.FLAGS
 
-flags.DEFINE_boolean('display', True, 'display screen')
+flags.DEFINE_boolean('display', False, 'display screen')
 
 flags.DEFINE_integer('random_seed', 8, "seed for random generation")
 
@@ -25,7 +25,7 @@ flags.DEFINE_integer('mini_batch', 32, "size of mini batch")
 
 flags.DEFINE_float('epsilon_begin', 0.1, 'epsilon greedy in the beginning')
 flags.DEFINE_float('epsilon_end', 0.00001, 'epsilon greedy in the end')
-flags.DEFINE_integer('observe_steps', 100, 'steps for observation')
+flags.DEFINE_integer('observe_steps', 10000, 'steps for observation')
 flags.DEFINE_integer('epsilon_steps', 3000000, 'steps for epsilon greedy explore')
 
 flags.DEFINE_integer('check_point_steps', 10000, 'steps for save model')

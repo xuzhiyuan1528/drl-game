@@ -72,7 +72,7 @@ class DqnBirdSyr():
 
         self._steps = 0
 
-        if mod:
+        if mod and os.path.exists(FLAGS.dir_mod.format(mod)):
             checkpoint = tf.train.get_checkpoint_state(FLAGS.dir_mod.format(mod))
             self._saver.restore(self._sess, save_path=checkpoint.model_checkpoint_path)
             print("Loaded checkpoints {0}".format(checkpoint.model_checkpoint_path))
@@ -84,6 +84,11 @@ class DqnBirdSyr():
             for _ in range(STATE_FRAMES):
                 last_state.append(self._ple.getScreenGrayscale())
             last_state = np.dstack(last_state)
+
+            # Avoid cold start
+            for i in range(10):
+                self._ple.act(self._ple.getActionSet()[0])
+                self._ple.act(self._ple.getActionSet()[1])
 
             for step in range(EP_STEPS):
 
@@ -156,5 +161,5 @@ class DqnBirdSyr():
 
 
 if __name__ == '__main__':
-    dqn_bird = DqnBirdSyr(playback_mode = False, mod='17-11-26-16-04-59')
+    dqn_bird = DqnBirdSyr(playback_mode=False, mod='17-11-27-14-15-13')
     dqn_bird.start()
