@@ -103,3 +103,7 @@ ENV/
 .idea
 PyGame-Learning-Environment
 Res
+
+info.txt
+itchat.pkl
+vis.png

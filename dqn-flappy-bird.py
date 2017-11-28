@@ -12,6 +12,10 @@ from Tools.replaybuffer import ReplayBuffer
 from flag_bird import FLAGS
 from Tools.summary import Summary
 
+from drlchat.logger import Logger
+
+logger = Logger('./info.txt')
+
 
 time_stamp = str(datetime.datetime.now().strftime('%y-%m-%d-%H-%M-%S'))
 
@@ -127,6 +131,7 @@ class DqnBirdSyr():
                           '| Episode: %i' % ep,
                           '| Epoch: %i' % step,
                           '| Sum_Reward: %i' % sum_reward)
+                    logger.info(int(sum_reward), 'sum_reward')
                     if loss != None:
                         self.summary.run(feed_dict={
                             'loss': loss,
