@@ -35,7 +35,7 @@ class DQNAgent():
         action_q_values = tf.reduce_sum(tf.multiply(self.__out, self.__actions))
 
         self.loss = tflearn.mean_square(self.__y_values, action_q_values)
-        self.optimize = tf.train.AdamOptimizer(self.__lr).minimize(self.loss)
+        self.optimize = tf.train.RMSPropOptimizer(self.__lr).minimize(self.loss)
 
     def train(self, inputs, action, y_values):
         return self.__sess.run([self.optimize, self.loss], feed_dict={

@@ -19,13 +19,13 @@ flags.DEFINE_integer('screen_width', 40, 'the width for screen')
 flags.DEFINE_integer('screen_height', 40, 'the height for screen')
 flags.DEFINE_integer('dim_action', 3, 'the dimension of action')
 
-flags.DEFINE_integer('size_buffer', 500000, 'the size of replay buffer')
+flags.DEFINE_integer('size_buffer', 100000, 'the size of replay buffer')
 flags.DEFINE_integer('mini_batch', 200, "size of mini batch")
 
 flags.DEFINE_float('epsilon_begin', 1.0, 'epsilon greedy in the beginning')
-flags.DEFINE_float('epsilon_end', 0.01, 'epsilon greedy in the end')
-flags.DEFINE_integer('observe_steps', 200, 'steps for observation')
-flags.DEFINE_integer('epsilon_steps', 500000, 'steps for epsilon greedy explore')
+flags.DEFINE_float('epsilon_end', 0.0001, 'epsilon greedy in the end')
+flags.DEFINE_integer('observe_steps', 10000, 'steps for observation')
+flags.DEFINE_integer('epsilon_steps', 3000000, 'steps for epsilon greedy explore')
 
 flags.DEFINE_integer('check_point_steps', 10000, 'steps for save model')
 

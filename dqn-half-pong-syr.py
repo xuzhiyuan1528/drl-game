@@ -4,6 +4,7 @@ from collections import deque
 import cv2
 import tensorflow as tf
 import numpy as np
+import os
 
 from Agent.agent_dqn import DQNAgent
 from Env.pygame_player import PyGamePlayer
@@ -70,7 +71,7 @@ class DqnHalfPongSyr(PyGamePlayer):
         self._sum_reward = 0
         self._dif_reward = deque(maxlen=EP_STEPS)
 
-        if mod:
+        if mod and os.path.exists(FLAGS.dir_mod.format(mod)):
             checkpoint = tf.train.get_checkpoint_state(FLAGS.dir_mod.format(mod))
             self.saver.restore(self.sess, save_path=checkpoint.model_checkpoint_path)
             print("Loaded checkpoints {0}".format(checkpoint.model_checkpoint_path))
@@ -98,9 +99,10 @@ class DqnHalfPongSyr(PyGamePlayer):
                           '| Epoch: %i' % (self._steps / EP_STEPS),
                           '| Sum_Reward: %i' % self._sum_reward,
                           '| Dif_Reward: %.4f' % (sum(self._dif_reward) / len(self._dif_reward)))
-                    self.summary.run(feed_dict={
-                        'loss': loss,
-                        'reward': self._sum_reward})
+                    if not self._steps % (EP_STEPS * 10):
+                        self.summary.run(feed_dict={
+                            'loss': loss,
+                            'reward': self._sum_reward})
                     self._sum_reward = 0
 
         self._last_state = current_state
@@ -166,5 +168,5 @@ class DqnHalfPongSyr(PyGamePlayer):
 
 
 if __name__ == '__main__':
-    dqn = DqnHalfPongSyr(playback_mode=False, mod='17-11-26-16-37-22')
+    dqn = DqnHalfPongSyr(playback_mode=False, mod=None)
     dqn.start()
