@@ -19,7 +19,7 @@ from Env.pygame_player import PyGamePlayer
 class DeepQHalfPongPlayer(PyGamePlayer):
     ACTIONS_COUNT = 3  # number of valid actions. In this case up, still and down
     FUTURE_REWARD_DISCOUNT = 0.99  # decay rate of past observations
-    OBSERVATION_STEPS = 50000.  # time steps to observe before training
+    OBSERVATION_STEPS = 1000.  # time steps to observe before training
     EXPLORE_STEPS = 500000.  # frames over which to anneal epsilon
     INITIAL_RANDOM_ACTION_PROB = 1.0  # starting chance of an action being random
     FINAL_RANDOM_ACTION_PROB = 0.05  # final chance of an action being random
@@ -43,7 +43,8 @@ class DeepQHalfPongPlayer(PyGamePlayer):
                  # playback_mode="True"
                  checkpoint_path="deep_q_half_pong_networks",
                  playback_mode=False,
-                 verbose_logging=True):
+                 verbose_logging=True,
+                 log_dir='./'):
         """
         Example of deep q network for pong
 
@@ -73,6 +74,7 @@ class DeepQHalfPongPlayer(PyGamePlayer):
         self._observations = deque()
         self._last_scores = deque()
         self._sum_reward = [0]
+        self._f_log = open(log_dir+'/pong.log', 'w', 1)
 
         # set the first action to do nothing
         self._last_action = np.zeros(self.ACTIONS_COUNT)
@@ -129,7 +131,14 @@ class DeepQHalfPongPlayer(PyGamePlayer):
                 self._sum_reward.append(reward)
                 if not self._time % self.STORE_SCORES_LEN:
                     print("Sum_Reward:", sum(self._sum_reward))
+                    print("Sum_Reward:", sum(self._sum_reward), file=self._f_log)
                     self._sum_reward = [0]
+                    print("Time: %s random_action_prob: %s reward %s scores differential %s" %
+                          (self._time, self._probability_of_random_action, reward,
+                           sum(self._last_scores) / self.STORE_SCORES_LEN))
+                    print("Time: %s random_action_prob: %s reward %s scores differential %s" %
+                          (self._time, self._probability_of_random_action, reward,
+                           sum(self._last_scores) / self.STORE_SCORES_LEN), file=self._f_log)
 
         # update the old values
         self._last_state = current_state
@@ -144,9 +153,9 @@ class DeepQHalfPongPlayer(PyGamePlayer):
                     (self.INITIAL_RANDOM_ACTION_PROB - self.FINAL_RANDOM_ACTION_PROB) / self.EXPLORE_STEPS
 
 
-            print("Time: %s random_action_prob: %s reward %s scores differential %s" %
-                  (self._time, self._probability_of_random_action, reward,
-                   sum(self._last_scores) / self.STORE_SCORES_LEN))
+            # print("Time: %s random_action_prob: %s reward %s scores differential %s" %
+            #       (self._time, self._probability_of_random_action, reward,
+            #        sum(self._last_scores) / self.STORE_SCORES_LEN))
 
         return DeepQHalfPongPlayer._key_presses_from_action(self._last_action)
 

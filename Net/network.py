@@ -41,19 +41,19 @@ def build_cnn_bird(dim_s, dim_a):
 
     net = tf.image.resize_images(inputs, size=(80, 80))
 
-    net = tflearn.conv_2d(net, 30, 3, strides=2, activation='relu')
+    net = tflearn.conv_2d(net, 32, 8, strides=4, activation='relu')
     net = tflearn.max_pool_2d(net, 2)
-    net = tflearn.local_response_normalization(net)
+    # net = tflearn.local_response_normalization(net)
 
-    net = tflearn.conv_2d(net, 64, 3, strides=2, activation='relu')
+    net = tflearn.conv_2d(net, 64, 4, strides=2, activation='relu')
     net = tflearn.max_pool_2d(net, 2)
-    net = tflearn.local_response_normalization(net)
+    # net = tflearn.local_response_normalization(net)
 
-    net = tflearn.fully_connected(net, 80, activation='tanh', regularizer='L2')
-    net = tflearn.dropout(net, 0.8)
+    net = tflearn.fully_connected(net, 512, activation='relu')
+    # net = tflearn.dropout(net, 0.8)
 
-    net = tflearn.fully_connected(net, 100, activation='tanh')
-    net = tflearn.dropout(net, 0.8)
+    net = tflearn.fully_connected(net, 512, activation='relu')
+    # net = tflearn.dropout(net, 0.8)
 
     q_values = tflearn.fully_connected(net, dim_a)
 

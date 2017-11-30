@@ -67,6 +67,7 @@ class DqnBirdSyr():
 
         self.summary.add_variable(tf.Variable(0.), 'reward')
         self.summary.add_variable(tf.Variable(0.), 'loss')
+        self.summary.add_variable(tf.Variable(0.), 'maxq')
         self.summary.build()
         self.summary.write_variables(FLAGS)
 
@@ -85,17 +86,20 @@ class DqnBirdSyr():
                 last_state.append(self._ple.getScreenGrayscale())
             last_state = np.dstack(last_state)
 
-            # # Avoid cold start
-            # for i in range(0):
-            #     self._ple.act(self._ple.getActionSet()[0])
-            #     self._ple.act(self._ple.getActionSet()[1])
+            last_max_qvalue = 0
 
             for step in range(EP_STEPS):
+                if not step % STATE_FRAMES:
+                    q_value = self._agent.predict([last_state])[0]
+                    last_max_qvalue = np.max(q_value)
 
-                q_value = self._agent.predict([last_state])[0]
-
-                act_1_hot = self._explorer.get_action(q_value)
-                act_index = np.argmax(act_1_hot)
+                    act_1_hot = self._explorer.get_action(q_value)
+                    act_index = np.argmax(act_1_hot)
+                else:
+                    # do nothing
+                    act_index = 1
+                    act_1_hot = np.zeros(DIM_ACTION)
+                    act_1_hot[act_index] = 1
 
                 reward = self._ple.act(self._ple.getActionSet()[act_index])
                 if reward == 0:
@@ -103,13 +107,11 @@ class DqnBirdSyr():
                 elif reward == -5:
                     reward = -1
 
-                state = []
-                for _ in range(STATE_FRAMES):
-                    state.append(self._ple.getScreenGrayscale())
-                state = np.dstack(state)
+                state = np.reshape(self._ple.getScreenGrayscale(), (SCREEN_WIDTH, SCREEN_HEIGHT, 1))
+                state = np.append(state, last_state[:, :, :3], axis=2)
 
                 done = False
-                if self._ple.game_over() or step == EP_STEPS - 1:
+                if self._ple.game_over():
                     done = True
 
                 self._replay_buffer.add(last_state, act_1_hot, reward, state, done)
@@ -122,15 +124,17 @@ class DqnBirdSyr():
                 sum_reward += reward
                 self._steps += 1
 
-                if done:
+                if done or step == EP_STEPS - 1:
                     print('| Step: %i' % self._steps,
                           '| Episode: %i' % ep,
                           '| Epoch: %i' % step,
+                          '| qvalue: %.5f' % last_max_qvalue,
                           '| Sum_Reward: %i' % sum_reward)
                     if loss != None:
                         self.summary.run(feed_dict={
                             'loss': loss,
-                            'reward': sum_reward})
+                            'reward': sum_reward,
+                            'maxq': last_max_qvalue})
                     self._ple.reset_game()
                     break
 
@@ -162,5 +166,5 @@ class DqnBirdSyr():
 
 
 if __name__ == '__main__':
-    dqn_bird = DqnBirdSyr(playback_mode=False, mod='17-11-27-14-15-13')
+    dqn_bird = DqnBirdSyr(playback_mode=False, mod='')
     dqn_bird.start()

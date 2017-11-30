@@ -68,7 +68,7 @@ class DqnHalfPongSyr(PyGamePlayer):
         self.summary.write_variables(FLAGS)
 
         self._steps = 0
-        self._sum_reward = 0
+        self._sum_reward = [0]
         self._dif_reward = deque(maxlen=EP_STEPS)
 
         if mod and os.path.exists(FLAGS.dir_mod.format(mod)):
@@ -91,19 +91,19 @@ class DqnHalfPongSyr(PyGamePlayer):
             self.replay_buffer.add(self._last_state, self._last_action, feedback, current_state, terminal)
             if len(self.replay_buffer) > OBV_STEPS:
                 loss = self._train()
-                self._sum_reward += feedback
+                self._sum_reward.append(feedback)
                 if feedback != 0.0:
                     self._dif_reward.append(feedback)
                 if not self._steps % EP_STEPS:
                     print('| Step: %i' % self._steps,
                           '| Epoch: %i' % (self._steps / EP_STEPS),
-                          '| Sum_Reward: %i' % self._sum_reward,
+                          '| Sum_Reward: %i' % sum(self._sum_reward),
                           '| Dif_Reward: %.4f' % (sum(self._dif_reward) / len(self._dif_reward)))
                     if not self._steps % (EP_STEPS * 10):
                         self.summary.run(feed_dict={
                             'loss': loss,
-                            'reward': self._sum_reward})
-                    self._sum_reward = 0
+                            'reward': sum(self._sum_reward)})
+                    self._sum_reward = [0]
 
         self._last_state = current_state
         self._last_action = self._get_action()

@@ -1,7 +1,7 @@
 import tensorflow as tf
 import tflearn
 
-from Net.network import build_cnn_pong, build_cnn_bird
+from Net.network import build_cnn_pong, build_cnn_bird, build_simple_cnn
 
 
 class DQNAgent():
@@ -13,9 +13,9 @@ class DQNAgent():
         self.__tau = tau
 
         if net_name == 'cnn_pong':
-            self.__inputs, self.__out = build_cnn_pong(dim_state, dim_action)
+            self.__inputs, self.__out = build_simple_cnn(dim_state, dim_action)
             self.__paras = tf.trainable_variables()
-            self.__target_inputs, self.__target_out = build_cnn_pong(dim_state, dim_action)
+            self.__target_inputs, self.__target_out = build_simple_cnn(dim_state, dim_action)
         else:
             self.__inputs, self.__out = build_cnn_bird(dim_state, dim_action)
             self.__paras = tf.trainable_variables()
