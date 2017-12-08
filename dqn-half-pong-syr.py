@@ -87,6 +87,10 @@ class DqnHalfPongSyr(PyGamePlayer):
         screen_binary = np.reshape(screen_binary, (SCREEN_WIDTH, SCREEN_HEIGHT, 1))
         current_state = np.append(self._last_state[:, :, 1:], screen_binary, axis=2)
 
+        if terminal:
+            import time
+            time.sleep(1)
+
         if not self._playback_mode:
             self.replay_buffer.add(self._last_state, self._last_action, feedback, current_state, terminal)
             if len(self.replay_buffer) > OBV_STEPS:
@@ -140,7 +144,6 @@ class DqnHalfPongSyr(PyGamePlayer):
 
         return loss
 
-
     def get_feedback(self):
         from Env.games.half_pong import score
 
@@ -168,5 +171,5 @@ class DqnHalfPongSyr(PyGamePlayer):
 
 
 if __name__ == '__main__':
-    dqn = DqnHalfPongSyr(playback_mode=False, mod=None)
+    dqn = DqnHalfPongSyr(playback_mode=True, mod='17-12-04-14-56-01')
     dqn.start()

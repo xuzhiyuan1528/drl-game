@@ -24,14 +24,14 @@ flags.DEFINE_integer('size_buffer', 50000, 'the size of replay buffer')
 flags.DEFINE_integer('mini_batch', 32, "size of mini batch")
 
 flags.DEFINE_float('epsilon_begin', 0.1, 'epsilon greedy in the beginning')
-flags.DEFINE_float('epsilon_end', 0.0001, 'epsilon greedy in the end')
+flags.DEFINE_float('epsilon_end', 0.00001, 'epsilon greedy in the end')
 flags.DEFINE_integer('observe_steps', 10000, 'steps for observation')
-flags.DEFINE_integer('epsilon_steps', 3000000, 'steps for epsilon greedy explore')
+flags.DEFINE_integer('epsilon_steps', 500000, 'steps for epsilon greedy explore')
 
 flags.DEFINE_integer('check_point_steps', 10000, 'steps for save model')
 
 flags.DEFINE_integer('episodes', 20000, "training episode")
-flags.DEFINE_integer('epochs', 1000, 'training epochs for each episode')
+flags.DEFINE_integer('epochs', 2000, 'training epochs for each episode')
 
 flags.DEFINE_float('gamma', 0.99, "discount value for reward")
 

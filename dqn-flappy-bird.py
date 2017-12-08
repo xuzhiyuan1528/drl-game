@@ -4,6 +4,7 @@ from ple.games.flappybird import FlappyBird
 import tensorflow as tf
 import numpy as np
 import os
+import time
 # The doc of Flappy Bird is at
 # http://pygame-learning-environment.readthedocs.io/en/latest/user/games/flappybird.html.
 from Agent.agent_dqn import DQNAgent
@@ -89,6 +90,7 @@ class DqnBirdSyr():
             last_max_qvalue = 0
 
             for step in range(EP_STEPS):
+                time.sleep(0.01)
                 if not step % STATE_FRAMES:
                     q_value = self._agent.predict([last_state])[0]
                     last_max_qvalue = np.max(q_value)
