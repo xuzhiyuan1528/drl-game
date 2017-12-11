@@ -11,6 +11,8 @@ def home_out(path):
 flags = tf.app.flags
 FLAGS = flags.FLAGS
 
+flags.DEFINE_string('info', 'dqn for pong in cnn syr', 'run information')
+
 flags.DEFINE_boolean('display', True, 'display screen')
 flags.DEFINE_integer('random_seed', 8, "seed for random generation")
 
@@ -24,13 +26,13 @@ flags.DEFINE_integer('mini_batch', 200, "size of mini batch")
 
 flags.DEFINE_float('epsilon_begin', 1.0, 'epsilon greedy in the beginning')
 flags.DEFINE_float('epsilon_end', 0.05, 'epsilon greedy in the end')
-flags.DEFINE_integer('observe_steps', 1000, 'steps for observation')
+flags.DEFINE_integer('observe_steps', 5000, 'steps for observation')
 flags.DEFINE_integer('epsilon_steps', 500000, 'steps for epsilon greedy explore')
 
 flags.DEFINE_integer('check_point_steps', 10000, 'steps for save model')
 
 # flags.DEFINE_integer('episodes', 20000, "training episode")
-flags.DEFINE_integer('epochs', 200, 'training epochs for each episode')
+flags.DEFINE_integer('epochs', 5000, 'training epochs for each episode')
 
 flags.DEFINE_float('gamma', 0.99, "discount value for reward")
 

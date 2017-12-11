@@ -1,10 +1,12 @@
 import datetime
+from collections import deque
+
 import cv2
 import tensorflow as tf
 import numpy as np
 import os
 
-from Agent.agent_dqn import DQNAgent
+from Agent.agent_ddqn import DDQNAgent
 from Env.pygame_player import PyGamePlayer
 from Tools.explorer import Explorer
 from Tools.replaybuffer import ReplayBuffer
@@ -25,6 +27,7 @@ DIM_STATE = [SCREEN_WIDTH, SCREEN_HEIGHT, STATE_FRAMES]
 DIM_ACTION = getattr(FLAGS, 'dim_action')
 
 LR = getattr(FLAGS, 'learning_rate')
+TAU = getattr(FLAGS, 'tau')
 GAMMA = getattr(FLAGS, 'gamma')
 
 DIR_SUM = getattr(FLAGS, 'dir_sum').format(time_stamp)
@@ -50,8 +53,9 @@ class DqnHalfPongSyr(PyGamePlayer):
         self._last_action[1] = 1
 
         self.sess = tf.Session()
-        self.agent = DQNAgent(self.sess, DIM_STATE, DIM_ACTION, LR, net_name=net_name)
+        self.agent = DDQNAgent(self.sess, DIM_STATE, DIM_ACTION, LR, TAU, net_name=net_name)
         self.sess.run(tf.global_variables_initializer())
+        self.agent.update_target_paras()
         self.saver = tf.train.Saver()
 
         self.replay_buffer = ReplayBuffer(BUFFER_SIZE)
@@ -65,6 +69,7 @@ class DqnHalfPongSyr(PyGamePlayer):
 
         self._steps = 0
         self._sum_reward = [0]
+        self._dif_reward = deque(maxlen=EP_STEPS)
 
         if mod and os.path.exists(FLAGS.dir_mod.format(mod)):
             checkpoint = tf.train.get_checkpoint_state(FLAGS.dir_mod.format(mod))
@@ -87,11 +92,14 @@ class DqnHalfPongSyr(PyGamePlayer):
             if len(self.replay_buffer) > OBV_STEPS:
                 loss = self._train()
                 self._sum_reward.append(feedback)
+                if feedback != 0.0:
+                    self._dif_reward.append(feedback)
                 if not self._steps % EP_STEPS:
                     print('| Step: %i' % self._steps,
                           '| Epoch: %i' % (self._steps / EP_STEPS),
-                          '| Sum_Reward: %i' % sum(self._sum_reward))
-                    if not self._steps % EP_STEPS:
+                          '| Sum_Reward: %i' % sum(self._sum_reward),
+                          '| Dif_Reward: %.4f' % (sum(self._dif_reward) / len(self._dif_reward)))
+                    if not self._steps % (EP_STEPS * 10):
                         self.summary.run(feed_dict={
                             'loss': loss,
                             'reward': sum(self._sum_reward)})
@@ -112,15 +120,19 @@ class DqnHalfPongSyr(PyGamePlayer):
             self.replay_buffer.sample_batch(MINI_BATCH)
 
         q_value = self.agent.predict(batch_state_next)
+        max_q_value_index = np.argmax(q_value, axis=1)
+        target_q_value = self.agent.predict_target(batch_state_next)
+        double_q = target_q_value[range(len(target_q_value)), max_q_value_index]
 
         batch_y = []
-        for r, q, d in zip(batch_reward, q_value, batch_done):
+        for r, q, d in zip(batch_reward, double_q, batch_done):
             if d:
                 batch_y.append(r)
             else:
-                batch_y.append(r + GAMMA * np.max(q))
+                batch_y.append(r + GAMMA * q)
 
         opt, loss = self.agent.train(batch_state, batch_action, batch_y)
+        self.agent.update_target_paras()
 
         if not self._steps % CKP_STEP:
             self.saver.save(self.sess, DIR_MOD + '/net', global_step=self._steps)

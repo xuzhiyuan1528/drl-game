@@ -7,12 +7,11 @@ import os
 import time
 # The doc of Flappy Bird is at
 # http://pygame-learning-environment.readthedocs.io/en/latest/user/games/flappybird.html.
-from Agent.agent_dqn import DQNAgent
+from Agent.agent_ddqn import DDQNAgent
 from Tools.explorer import Explorer
 from Tools.replaybuffer import ReplayBuffer
 from flag_bird import FLAGS
 from Tools.summary import Summary
-
 
 time_stamp = str(datetime.datetime.now().strftime('%y-%m-%d-%H-%M-%S'))
 
@@ -47,7 +46,7 @@ DISPLAY = getattr(FLAGS, 'display')
 
 if not DISPLAY:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
-class DqnBirdSyr():
+class DdqnBirdSyr():
 
     def __init__(self, playback_mode, mod=None):
         self._playback_mode = playback_mode
@@ -57,7 +56,7 @@ class DqnBirdSyr():
         self._ple.init()
 
         self._sess = tf.Session()
-        self._agent = DQNAgent(self._sess, DIM_STATE, DIM_ACTION, LR, TAU, net_name='cnn_bird')
+        self._agent = DDQNAgent(self._sess, DIM_STATE, DIM_ACTION, LR, TAU, net_name='cnn_bird')
         self._sess.run(tf.global_variables_initializer())
         self._agent.update_target_paras()
 
@@ -168,5 +167,5 @@ class DqnBirdSyr():
 
 
 if __name__ == '__main__':
-    dqn_bird = DqnBirdSyr(playback_mode=False, mod='')
+    dqn_bird = DdqnBirdSyr(playback_mode=False, mod='')
     dqn_bird.start()
